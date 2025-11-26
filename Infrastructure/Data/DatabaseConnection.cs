@@ -10,6 +10,9 @@ namespace Prueba1_Login.Infrastructure.Data
     {
         private static readonly string? connectionString;
 
+        // ==============================
+        //   Constructor estático
+        // ==============================
         static DatabaseConnection()
         {
             try
@@ -17,7 +20,7 @@ namespace Prueba1_Login.Infrastructure.Data
                 string baseDir = AppDomain.CurrentDomain.BaseDirectory;
                 string envPath = Path.Combine(baseDir, ".env");
 
-                // 🔹 En desarrollo, el .env suele estar 2 carpetas arriba
+                // 🔹 En entorno de desarrollo el .env suele estar más arriba
                 if (!File.Exists(envPath))
                 {
                     string altPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\.env");
@@ -28,6 +31,7 @@ namespace Prueba1_Login.Infrastructure.Data
                 if (!File.Exists(envPath))
                     throw new FileNotFoundException($"No se encontró el archivo .env en: {envPath}");
 
+                // Cargar variables del archivo .env
                 Env.Load(envPath);
 
                 string user = Env.GetString("DB_USER");
@@ -36,13 +40,17 @@ namespace Prueba1_Login.Infrastructure.Data
                 string port = Env.GetString("DB_PORT");
                 string service = Env.GetString("DB_SERVICE");
 
+                // Validar variables requeridas
                 if (string.IsNullOrWhiteSpace(user) ||
                     string.IsNullOrWhiteSpace(pass) ||
                     string.IsNullOrWhiteSpace(host) ||
                     string.IsNullOrWhiteSpace(port) ||
                     string.IsNullOrWhiteSpace(service))
+                {
                     throw new Exception("Faltan variables requeridas en el archivo .env");
+                }
 
+                // Construir cadena de conexión
                 connectionString =
                     $"User Id={user};Password={pass};Data Source=" +
                     $"(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={host})(PORT={port}))" +
@@ -57,6 +65,9 @@ namespace Prueba1_Login.Infrastructure.Data
             }
         }
 
+        // ==============================
+        //   Obtener conexión Oracle
+        // ==============================
         public static OracleConnection GetConnection()
         {
             if (string.IsNullOrEmpty(connectionString))
@@ -65,6 +76,9 @@ namespace Prueba1_Login.Infrastructure.Data
             return new OracleConnection(connectionString);
         }
 
+        // ==============================
+        //   Probar conexión a Oracle
+        // ==============================
         public static bool ProbarConexion()
         {
             try

@@ -1,7 +1,5 @@
 ﻿using Prueba1_Login.AppCore.Services;
 using Prueba1_Login.Presentation.Interfaces;
-using Prueba1_Login.Domain.Entities;
-using System.Collections.Generic;
 
 namespace Prueba1_Login.Presentation.Presenters
 {
@@ -21,7 +19,7 @@ namespace Prueba1_Login.Presentation.Presenters
             var u = _service.ObtenerPorCodigo(codigo);
             if (u == null)
             {
-                _view.MostrarMensaje("Usuario no encontrado.");
+                _view.MostrarMensaje("Usuario no encontrado.SDSAFAF");
                 return;
             }
             _view.MostrarUsuario(u);

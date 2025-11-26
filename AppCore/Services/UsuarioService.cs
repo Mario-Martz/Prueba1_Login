@@ -1,5 +1,6 @@
 ﻿using Prueba1_Login.AppCore.UseCases;
 using Prueba1_Login.Domain.Entities;
+using Prueba1_Login.Domain.Enums;
 using Prueba1_Login.Domain.Interfaces;
 
 namespace Prueba1_Login.AppCore.Services
@@ -8,6 +9,7 @@ namespace Prueba1_Login.AppCore.Services
     {
         private readonly IUsuarioRepository _repo;
         private readonly CrearUsuarioUseCase _crearUsuario;
+        private readonly LoginUseCase _login;
 
         // ================================
         // ÚNICO CONSTRUCTOR CORRECTO
@@ -16,6 +18,13 @@ namespace Prueba1_Login.AppCore.Services
         {
             _repo = repo;
             _crearUsuario = new CrearUsuarioUseCase(repo);
+            _login = new LoginUseCase(repo);
+        }
+
+
+        public (EstadoLogin estado, string? perfil) Login(string codigo, string password)
+        {
+            return _login.Ejecutar(codigo, password);
         }
 
         // ================================

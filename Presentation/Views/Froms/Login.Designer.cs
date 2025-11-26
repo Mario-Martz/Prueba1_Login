@@ -51,7 +51,7 @@ namespace Prueba1_Login
             pnl_login.Dock = DockStyle.Left;
             pnl_login.Location = new Point(0, 0);
             pnl_login.Name = "pnl_login";
-            pnl_login.Size = new Size(320, 282);
+            pnl_login.Size = new Size(320, 292);
             pnl_login.TabIndex = 0;
             pnl_login.Paint += pnl_login_Paint;
             // 
@@ -101,7 +101,7 @@ namespace Prueba1_Login
             pnl_img_login.Dock = DockStyle.Fill;
             pnl_img_login.Location = new Point(320, 0);
             pnl_img_login.Name = "pnl_img_login";
-            pnl_img_login.Size = new Size(615, 282);
+            pnl_img_login.Size = new Size(615, 292);
             pnl_img_login.TabIndex = 1;
             // 
             // picture_logo_login
@@ -111,14 +111,14 @@ namespace Prueba1_Login
             picture_logo_login.Image = Resources.Properties.Resources.imagotipo_Loteria_v2;
             picture_logo_login.Location = new Point(0, 0);
             picture_logo_login.Name = "picture_logo_login";
-            picture_logo_login.Size = new Size(615, 282);
+            picture_logo_login.Size = new Size(615, 292);
             picture_logo_login.SizeMode = PictureBoxSizeMode.Zoom;
             picture_logo_login.TabIndex = 0;
             picture_logo_login.TabStop = false;
             // 
             // Login
             // 
-            ClientSize = new Size(935, 282);
+            ClientSize = new Size(935, 292);
             Controls.Add(pnl_img_login);
             Controls.Add(pnl_login);
             Name = "Login";

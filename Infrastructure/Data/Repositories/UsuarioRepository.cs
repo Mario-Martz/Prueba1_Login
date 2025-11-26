@@ -7,7 +7,7 @@ namespace Prueba1_Login.Infrastructure.Data.Repositories
     public class UsuarioRepository : IUsuarioRepository
     {
         // =====================================================
-        // OBTENER POR CÓDIGO
+        // OBTENER POR CÓDIGO (CORREGIDO)
         // =====================================================
         public Usuario? ObtenerPorCodigo(string codigo)
         {
@@ -22,12 +22,12 @@ namespace Prueba1_Login.Infrastructure.Data.Repositories
                         U.NOMBRE, 
                         U.APELLIDO_PATERNO, 
                         U.APELLIDO_MATERNO,
-                        U.PASSWORD_HASH,
-                        U.PASSWORD_SALT,
+                        NVL(U.PASSWORD_HASH, ''),
+                        NVL(U.PASSWORD_SALT, ''),
                         P.DESCRIPCION
                     FROM USUARIOS U
                     JOIN PERFILES P ON U.CVE_PERFIL = P.CVE_PERFIL
-                    WHERE U.CVE_USUARIO = :cve";
+                    WHERE UPPER(U.CVE_USUARIO) = UPPER(:cve)";
 
                 using var cmd = new OracleCommand(sql, conn);
                 cmd.Parameters.Add(":cve", codigo);
@@ -71,8 +71,8 @@ namespace Prueba1_Login.Infrastructure.Data.Repositories
                         U.NOMBRE, 
                         U.APELLIDO_PATERNO, 
                         U.APELLIDO_MATERNO,
-                        U.PASSWORD_HASH,
-                        U.PASSWORD_SALT,
+                        NVL(U.PASSWORD_HASH, ''),
+                        NVL(U.PASSWORD_SALT, ''),
                         P.DESCRIPCION
                     FROM USUARIOS U
                     JOIN PERFILES P ON U.CVE_PERFIL = P.CVE_PERFIL
@@ -105,11 +105,11 @@ namespace Prueba1_Login.Infrastructure.Data.Repositories
         }
 
         // =====================================================
-        // OBTENER TODOS (NO TRAE HASH)
+        // OBTENER TODOS
         // =====================================================
         public List<Usuario> ObtenerTodos()
         {
-            List<Usuario> lista = new();
+            var lista = new List<Usuario>();
 
             try
             {
@@ -118,13 +118,16 @@ namespace Prueba1_Login.Infrastructure.Data.Repositories
 
                 string sql = @"
                     SELECT 
-                        U.CVE_USUARIO, 
-                        U.NOMBRE, 
-                        U.APELLIDO_PATERNO, 
+                        U.CVE_USUARIO,
+                        U.NOMBRE,
+                        U.APELLIDO_PATERNO,
                         U.APELLIDO_MATERNO,
+                        NVL(U.PASSWORD_HASH, ''),
+                        NVL(U.PASSWORD_SALT, ''),
                         P.DESCRIPCION
                     FROM USUARIOS U
-                    JOIN PERFILES P ON U.CVE_PERFIL = P.CVE_PERFIL";
+                    JOIN PERFILES P ON U.CVE_PERFIL = P.CVE_PERFIL
+                    ORDER BY U.CVE_USUARIO";
 
                 using var cmd = new OracleCommand(sql, conn);
                 using var reader = cmd.ExecuteReader();
@@ -137,7 +140,9 @@ namespace Prueba1_Login.Infrastructure.Data.Repositories
                         Nombre = reader.GetString(1),
                         ApellidoPaterno = reader.GetString(2),
                         ApellidoMaterno = reader.GetString(3),
-                        Perfil = reader.GetString(4)
+                        PasswordHash = reader.GetString(4),
+                        PasswordSalt = reader.GetString(5),
+                        Perfil = reader.GetString(6)
                     });
                 }
             }
@@ -159,13 +164,36 @@ namespace Prueba1_Login.Infrastructure.Data.Repositories
                 using var conn = DatabaseConnection.GetConnection();
                 conn.Open();
 
+                // VALIDAR QUE EL PERFIL EXISTA
+                string sqlPerfil = "SELECT CVE_PERFIL FROM PERFILES WHERE DESCRIPCION = :perfil";
+
+                int cvePerfil = -1;
+                using (var cmdPerfil = new OracleCommand(sqlPerfil, conn))
+                {
+                    cmdPerfil.Parameters.Add(":perfil", usuario.Perfil);
+
+                    var result = cmdPerfil.ExecuteScalar();
+                    if (result == null)
+                    {
+                        MessageBox.Show(
+                            $"El perfil '{usuario.Perfil}' no existe en la tabla PERFILES.",
+                            "ERROR",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error);
+
+                        return false;
+                    }
+
+                    cvePerfil = Convert.ToInt32(result);
+                }
+
+                // INSERTAR USUARIO
                 string sql = @"
-                    INSERT INTO USUARIOS
-                    (CVE_USUARIO, NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO, 
-                     PASSWORD_HASH, PASSWORD_SALT, CVE_PERFIL)
-                    VALUES
-                    (:codigo, :nombre, :apP, :apM, :hash, :salt,
-                        (SELECT CVE_PERFIL FROM PERFILES WHERE DESCRIPCION = :perfil))";
+            INSERT INTO USUARIOS
+            (CVE_USUARIO, NOMBRE, APELLIDO_PATERNO, APELLIDO_MATERNO,
+             PASSWORD_HASH, PASSWORD_SALT, CVE_PERFIL)
+            VALUES
+            (:codigo, :nombre, :apP, :apM, :hash, :salt, :perfil)";
 
                 using var cmd = new OracleCommand(sql, conn);
 
@@ -175,16 +203,22 @@ namespace Prueba1_Login.Infrastructure.Data.Repositories
                 cmd.Parameters.Add(":apM", usuario.ApellidoMaterno);
                 cmd.Parameters.Add(":hash", usuario.PasswordHash);
                 cmd.Parameters.Add(":salt", usuario.PasswordSalt);
-                cmd.Parameters.Add(":perfil", usuario.Perfil);
+                cmd.Parameters.Add(":perfil", cvePerfil);
 
                 return cmd.ExecuteNonQuery() > 0;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error CrearUsuario: {ex.Message}");
+                MessageBox.Show(
+                    "Error CrearUsuario:\n" + ex.Message,
+                    "ERROR",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
                 return false;
             }
         }
+
 
         // =====================================================
         // ACTUALIZAR

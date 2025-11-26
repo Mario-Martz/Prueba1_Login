@@ -1,10 +1,8 @@
 ﻿using Prueba1_Login.AppCore.Services;
 using Prueba1_Login.AppCore.Session;
-using Prueba1_Login.Debug;
 using Prueba1_Login.Domain.Entities;
 using Prueba1_Login.Domain.Enums;
 using Prueba1_Login.Infrastructure.Data.Repositories;
-using Prueba1_Login.Infrastructure.Security;
 using Prueba1_Login.Resources.Fonts_Personalizados;
 
 namespace Prueba1_Login.Views
@@ -176,29 +174,20 @@ namespace Prueba1_Login.Views
                 PerfilUsuario perfilEnum = (PerfilUsuario)comboBox_Pefl_Users.SelectedItem;
                 string perfilTextoBD = perfilEnum.ToString().ToUpper();
 
-                // Código
                 string codigoGenerado = GenerarCodigoUsuario();
 
-                // ============================================
-                // 🔥 Generar HASH + SALT
-                // ============================================
-                var (hash, salt) = SecurityHelper.CrearPasswordHash(txtCre_password.PasswordValue.Trim());
-
-                // ============================================
-                // 🔥 Crear usuario
-                // ============================================
+                // ⚡ Crear usuario SIN HASH (el UseCase lo hace)
                 Usuario nuevo = new Usuario
                 {
                     Codigo = codigoGenerado,
                     Nombre = txtCre_Nombre.Text.Trim(),
                     ApellidoPaterno = txtCre__Apell_P.Text.Trim(),
                     ApellidoMaterno = txtCre__Apell_M.Text.Trim(),
-                    Perfil = perfilTextoBD,
-                    PasswordHash = hash,
-                    PasswordSalt = salt
+                    Perfil = perfilTextoBD
                 };
 
-                bool creado = _usuarioService.CrearUsuario(nuevo);
+                // ⚡ UseCase genera HASH y SALT internamente
+                bool creado = _usuarioService.CrearUsuario(nuevo, txtCre_password.PasswordValue.Trim());
 
                 if (!creado)
                 {
@@ -210,10 +199,7 @@ namespace Prueba1_Login.Views
                 MessageBox.Show("Usuario creado correctamente.",
                     "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                // Limpiar campos
                 LimpiarCamposCrearUsuario();
-
-                // Recargar tabla
                 userTable.CargarDatos();
                 tabConfiguraciones.SelectedTab = tab_PanelAdministracionU;
             }

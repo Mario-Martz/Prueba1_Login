@@ -3,36 +3,34 @@ using Prueba1_Login.Domain.Interfaces;
 using Prueba1_Login.Infrastructure.Security;
 using System;
 
-namespace Prueba1_Login.AppCore.Services
+namespace Prueba1_Login.AppCore.UseCases
 {
-    public static class LoginService
+    public class LoginUseCase
     {
-        private static IUsuarioRepository _usuarioRepository;
+        private readonly IUsuarioRepository _usuarioRepository;
 
-        // Inyección del repositorio
-        public static void Initialize(IUsuarioRepository usuarioRepository)
+        public LoginUseCase(IUsuarioRepository repository)
         {
-            _usuarioRepository = usuarioRepository;
+            _usuarioRepository = repository;
         }
 
-        public static (EstadoLogin estado, string? perfil) ValidarCredenciales(string codigoUsuario, string password)
+        public (EstadoLogin estado, string? perfil) Ejecutar(string codigoUsuario, string password)
         {
             Console.WriteLine("======================================");
             Console.WriteLine("🔐 Validando credenciales con HASH + SALT");
             Console.WriteLine($"Usuario ingresado: {codigoUsuario}");
             Console.WriteLine("======================================");
 
-            codigoUsuario = codigoUsuario?.Trim() ?? string.Empty;
+            // NORMALIZAMOS → elimina espacios + pone mayúsculas
+            codigoUsuario = (codigoUsuario?.Trim().ToUpper()) ?? string.Empty;
             password = password?.Trim() ?? string.Empty;
 
-            // 1️⃣ Validar campos vacíos
             if (string.IsNullOrWhiteSpace(codigoUsuario) || string.IsNullOrWhiteSpace(password))
             {
-                Console.WriteLine("❌ Error: Usuario o contraseña vacíos");
                 return (EstadoLogin.Vacios, null);
             }
 
-            // 2️⃣ Obtener usuario desde la BD
+            // Buscar usuario por código (con Oracle case-insensitive)
             var usuario = _usuarioRepository.ObtenerPorCodigo(codigoUsuario);
 
             if (usuario == null)
@@ -43,7 +41,7 @@ namespace Prueba1_Login.AppCore.Services
 
             Console.WriteLine($"✔ Usuario encontrado: {usuario.Codigo}");
 
-            // 3️⃣ Validar hash + salt
+            // Validar password
             bool valido = SecurityHelper.VerificarPassword(
                 password,
                 usuario.PasswordHash,
@@ -52,11 +50,11 @@ namespace Prueba1_Login.AppCore.Services
 
             if (!valido)
             {
-                Console.WriteLine("❌ Contraseña incorrecta (HASH no coincide)");
+                Console.WriteLine("❌ Contraseña incorrecta");
                 return (EstadoLogin.ContraseñaIncorrecta, null);
             }
 
-            Console.WriteLine("✔ Login exitoso con HASH + SALT");
+            Console.WriteLine("✔ Login exitoso");
             return (EstadoLogin.Exitoso, usuario.Perfil);
         }
     }
