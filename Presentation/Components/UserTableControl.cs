@@ -1,5 +1,6 @@
 ﻿using Prueba1_Login.Domain.Entities;
 using Prueba1_Login.Infrastructure.Data.Repositories;
+using Prueba1_Login.AppCore.Session;
 using System.ComponentModel;
 
 namespace Prueba1_Login.Presentation.Components
@@ -77,7 +78,6 @@ namespace Prueba1_Login.Presentation.Components
             dgvUsuarios.Columns.Add("ApellidoMaterno", "Apellido Materno");
             dgvUsuarios.Columns.Add("Perfil", "Perfil");
 
-            // Columna Acciones como TEXTO, NO imagen
             DataGridViewTextBoxColumn colAcciones = new()
             {
                 Name = "Acciones",
@@ -123,25 +123,21 @@ namespace Prueba1_Login.Presentation.Components
         }
 
         // -----------------------------------------------------
-        // PINTAR ICONOS EN CELDA ACCIONES
+        // PINTAR ICONOS (editar / eliminar)
         // -----------------------------------------------------
         private void dgvUsuarios_CellPainting(object? sender, DataGridViewCellPaintingEventArgs e)
         {
-            if (e.RowIndex < 0 || e.ColumnIndex < 0)
-                return;
+            if (e.RowIndex < 0 || e.ColumnIndex < 0) return;
 
-            if (dgvUsuarios.Columns[e.ColumnIndex].Name != "Acciones")
-                return;
+            if (dgvUsuarios.Columns[e.ColumnIndex].Name != "Acciones") return;
 
             e.Handled = true;
 
-            // Fondo limpio SIN imagen base del DataGridView
             e.PaintBackground(e.CellBounds, true);
 
             int iconSize = 20;
             int padding = 8;
 
-            // posición ícono editar
             Rectangle btnEditar = new Rectangle(
                 e.CellBounds.X + padding,
                 e.CellBounds.Y + (e.CellBounds.Height - iconSize) / 2,
@@ -149,7 +145,6 @@ namespace Prueba1_Login.Presentation.Components
                 iconSize
             );
 
-            // posición ícono eliminar
             Rectangle btnEliminar = new Rectangle(
                 e.CellBounds.X + padding + iconSize + padding,
                 e.CellBounds.Y + (e.CellBounds.Height - iconSize) / 2,
@@ -157,7 +152,6 @@ namespace Prueba1_Login.Presentation.Components
                 iconSize
             );
 
-            // dibujar íconos
             e.Graphics.DrawImage(Resources.Properties.Resources.edit, btnEditar);
             e.Graphics.DrawImage(Resources.Properties.Resources.delete, btnEliminar);
         }
@@ -172,13 +166,38 @@ namespace Prueba1_Login.Presentation.Components
 
             Usuario usuario = (Usuario)dgvUsuarios.Rows[e.RowIndex].Tag;
 
+            // ================================
+            // 🛑 NO PERMITIR ELIMINAR EL USUARIO LOGUEADO
+            // ================================
+            if (usuario.Codigo == SessionManager.UsuarioCodigo)
+            {
+                MessageBox.Show(
+                    "No puedes eliminar el usuario activo que está usando el sistema.",
+                    "Acción no permitida",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                return;
+            }
+
             var cellRect = dgvUsuarios.GetCellDisplayRectangle(e.ColumnIndex, e.RowIndex, false);
 
             int iconSize = 20;
             int padding = 8;
 
-            Rectangle editarRect = new Rectangle(cellRect.X + padding, cellRect.Y + (cellRect.Height - iconSize) / 2, iconSize, iconSize);
-            Rectangle eliminarRect = new Rectangle(cellRect.X + padding + iconSize + padding, cellRect.Y + (cellRect.Height - iconSize) / 2, iconSize, iconSize);
+            Rectangle editarRect = new Rectangle(
+                cellRect.X + padding,
+                cellRect.Y + (cellRect.Height - iconSize) / 2,
+                iconSize,
+                iconSize
+            );
+
+            Rectangle eliminarRect = new Rectangle(
+                cellRect.X + padding + iconSize + padding,
+                cellRect.Y + (cellRect.Height - iconSize) / 2,
+                iconSize,
+                iconSize
+            );
 
             Point cursor = dgvUsuarios.PointToClient(Cursor.Position);
 
