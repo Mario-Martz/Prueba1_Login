@@ -54,7 +54,6 @@ namespace Prueba1_Login.Infrastructure.Data.Repositories
 
             return null;
         }
-
         // =====================================================
         // OBTENER POR NOMBRE
         // =====================================================
@@ -103,7 +102,6 @@ namespace Prueba1_Login.Infrastructure.Data.Repositories
 
             return null;
         }
-
         // =====================================================
         // OBTENER TODOS
         // =====================================================
@@ -153,7 +151,6 @@ namespace Prueba1_Login.Infrastructure.Data.Repositories
 
             return lista;
         }
-
         // =====================================================
         // CREAR
         // =====================================================
@@ -218,8 +215,6 @@ namespace Prueba1_Login.Infrastructure.Data.Repositories
                 return false;
             }
         }
-
-
         // =====================================================
         // ACTUALIZAR
         // =====================================================
@@ -231,14 +226,19 @@ namespace Prueba1_Login.Infrastructure.Data.Repositories
                 conn.Open();
 
                 string sql = @"
-                    UPDATE USUARIOS
-                    SET NOMBRE = :nombre,
-                        APELLIDO_PATERNO = :apP,
-                        APELLIDO_MATERNO = :apM,
-                        PASSWORD_HASH = :hash,
-                        PASSWORD_SALT = :salt,
-                        CVE_PERFIL = (SELECT CVE_PERFIL FROM PERFILES WHERE DESCRIPCION = :perfil)
-                    WHERE CVE_USUARIO = :codigo";
+            UPDATE USUARIOS
+            SET 
+                NOMBRE = :nombre,
+                APELLIDO_PATERNO = :apP,
+                APELLIDO_MATERNO = :apM,
+                PASSWORD_HASH = :hash,
+                PASSWORD_SALT = :salt,
+                CVE_PERFIL = (
+                    SELECT CVE_PERFIL 
+                    FROM PERFILES 
+                    WHERE UPPER(DESCRIPCION) = :perfil
+                )
+            WHERE CVE_USUARIO = :codigo";
 
                 using var cmd = new OracleCommand(sql, conn);
 
@@ -247,7 +247,7 @@ namespace Prueba1_Login.Infrastructure.Data.Repositories
                 cmd.Parameters.Add(":apM", usuario.ApellidoMaterno);
                 cmd.Parameters.Add(":hash", usuario.PasswordHash);
                 cmd.Parameters.Add(":salt", usuario.PasswordSalt);
-                cmd.Parameters.Add(":perfil", usuario.Perfil);
+                cmd.Parameters.Add(":perfil", usuario.Perfil.ToUpper());
                 cmd.Parameters.Add(":codigo", usuario.Codigo);
 
                 return cmd.ExecuteNonQuery() > 0;
@@ -258,7 +258,6 @@ namespace Prueba1_Login.Infrastructure.Data.Repositories
                 return false;
             }
         }
-
         // =====================================================
         // ELIMINAR
         // =====================================================

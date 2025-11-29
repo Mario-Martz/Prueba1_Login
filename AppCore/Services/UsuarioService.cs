@@ -10,18 +10,23 @@ namespace Prueba1_Login.AppCore.Services
         private readonly IUsuarioRepository _repo;
         private readonly CrearUsuarioUseCase _crearUsuario;
         private readonly LoginUseCase _login;
+        private readonly ActualizarUsuarioUseCase _actualizarUsuario;
 
         // ================================
-        // ÚNICO CONSTRUCTOR CORRECTO
+        // CONSTRUCTOR
         // ================================
         public UsuarioService(IUsuarioRepository repo)
         {
             _repo = repo;
             _crearUsuario = new CrearUsuarioUseCase(repo);
             _login = new LoginUseCase(repo);
+            _actualizarUsuario = new ActualizarUsuarioUseCase(repo); // 👈 INYECTADO
         }
 
 
+        // ================================
+        // LOGIN
+        // ================================
         public (EstadoLogin estado, string? perfil) Login(string codigo, string password)
         {
             return _login.Ejecutar(codigo, password);
@@ -45,7 +50,7 @@ namespace Prueba1_Login.AppCore.Services
         }
 
         // ================================
-        // NUEVO: OBTENER POR NOMBRE
+        // OBTENER POR NOMBRE
         // ================================
         public Usuario? ObtenerPorNombre(string nombre)
         {
@@ -66,7 +71,7 @@ namespace Prueba1_Login.AppCore.Services
         // ================================
         public bool Actualizar(Usuario usuario)
         {
-            return _repo.Actualizar(usuario);
+            return _actualizarUsuario.Ejecutar(usuario);  // 👈 AHORA USA EL USE CASE
         }
 
         // ================================

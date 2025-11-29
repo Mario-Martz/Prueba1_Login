@@ -1,8 +1,11 @@
 ﻿using Prueba1_Login.AppCore.Services;
 using Prueba1_Login.AppCore.Session;
+using Prueba1_Login.AppCore.UseCases;
 using Prueba1_Login.Domain.Entities;
 using Prueba1_Login.Domain.Enums;
+using Prueba1_Login.Domain.Interfaces;
 using Prueba1_Login.Infrastructure.Data.Repositories;
+using Prueba1_Login.Infrastructure.Security;
 using Prueba1_Login.Resources.Fonts_Personalizados;
 
 namespace Prueba1_Login.Views
@@ -12,7 +15,16 @@ namespace Prueba1_Login.Views
         // ============================================
         // 🔵 SERVICIOS, REPOS Y VARIABLES GLOBALES
         // ============================================
+
         private readonly UsuarioService _usuarioService = new UsuarioService(new UsuarioRepository());
+
+        // Repo + UseCase nuevos ⬇⬇⬇
+        private readonly IUsuarioRepository _usuarioRepository;
+        private readonly ActualizarUsuarioUseCase _actualizarUsuarioUseCase;
+
+        // 🔵 Usuario actualmente en edición
+        private Usuario? _usuarioEnEdicion;
+
 
         public Configuracion_Home(int tabIndex = 0)
         {
@@ -30,8 +42,15 @@ namespace Prueba1_Login.Views
             userTable.OnDelete += UserTable_OnDelete;
             userTable.OnEdit += UserTable_OnEdit;
 
+            // ================================
+            // 🔥 CREAR REPOSITORY + USE CASE
+            // ================================
+            _usuarioRepository = new UsuarioRepository();
+            _actualizarUsuarioUseCase = new ActualizarUsuarioUseCase(_usuarioRepository);
+
             // Cargar perfiles
             CargarPerfilesUsuarios();
+            CargarPerfilesModificacion();
 
             tabConfiguraciones.SelectedIndex = tabIndex;
         }
@@ -88,7 +107,15 @@ namespace Prueba1_Login.Views
 
         private void UserTable_OnEdit(Usuario usuario)
         {
-            MessageBox.Show($"Editar usuario: {usuario.Nombre}", "Edición", MessageBoxButtons.OK);
+            _usuarioEnEdicion = usuario;
+
+            TextBoxMod_Nombre.Text = usuario.Nombre;
+            TextBoxMod_Apell_P.Text = usuario.ApellidoPaterno;
+            TextBoxMod_Apell_M.Text = usuario.ApellidoMaterno;
+
+            if (Enum.TryParse<PerfilUsuario>(usuario.Perfil, true, out var perfilEnum))
+                comboBox_Mod_Perfil.SelectedItem = perfilEnum;
+
             tabConfiguraciones.SelectedTab = tab_ModificarU;
         }
 
@@ -138,13 +165,12 @@ namespace Prueba1_Login.Views
         }
 
         // ============================================
-        // 🟢 TAB 2 — CREAR USUARIO (USANDO HASH)
+        // 🟢 TAB 2 — CREAR USUARIO
         // ============================================
         private void add_user_CreateU_Click(object sender, EventArgs e)
         {
             try
             {
-                // ---- VALIDACIONES ----
                 if (string.IsNullOrWhiteSpace(txtCre_Nombre.Text) ||
                     string.IsNullOrWhiteSpace(txtCre__Apell_P.Text) ||
                     string.IsNullOrWhiteSpace(txtCre__Apell_M.Text) ||
@@ -163,7 +189,6 @@ namespace Prueba1_Login.Views
                     return;
                 }
 
-                // Perfil
                 if (comboBox_Pefl_Users.SelectedItem == null)
                 {
                     MessageBox.Show("Selecciona un perfil para el usuario.",
@@ -176,7 +201,6 @@ namespace Prueba1_Login.Views
 
                 string codigoGenerado = GenerarCodigoUsuario();
 
-                // ⚡ Crear usuario SIN HASH (el UseCase lo hace)
                 Usuario nuevo = new Usuario
                 {
                     Codigo = codigoGenerado,
@@ -186,7 +210,6 @@ namespace Prueba1_Login.Views
                     Perfil = perfilTextoBD
                 };
 
-                // ⚡ UseCase genera HASH y SALT internamente
                 bool creado = _usuarioService.CrearUsuario(nuevo, txtCre_password.PasswordValue.Trim());
 
                 if (!creado)
@@ -211,15 +234,51 @@ namespace Prueba1_Login.Views
         }
 
         // ============================================
-        // 🟣 TAB 3 — EDITAR USUARIO (AÚN PENDIENTE)
+        // 🟣 TAB 3 — EDITAR USUARIO (CON USE CASE)
         // ============================================
-        // Aquí se implementarán:
-        // - Cargar usuario seleccionado
-        // - Validar contraseña actual
-        // - Guardar edición
-        // ============================================
+        private void btn_Modi_User_Click(object sender, EventArgs e)
+        {
+            if (_usuarioEnEdicion == null)
+            {
+                MessageBox.Show("No hay usuario cargado.", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
+            try
+            {
+                _usuarioEnEdicion.Nombre = TextBoxMod_Nombre.Text.Trim();
+                _usuarioEnEdicion.ApellidoPaterno = TextBoxMod_Apell_P.Text.Trim();
+                _usuarioEnEdicion.ApellidoMaterno = TextBoxMod_Apell_M.Text.Trim();
 
+                PerfilUsuario perfilEnum = (PerfilUsuario)comboBox_Mod_Perfil.SelectedItem;
+                _usuarioEnEdicion.Perfil = perfilEnum.ToString().ToUpper();
+
+                string passAnterior = Box_Edit_password_after.PasswordValue.Trim();
+                string passNueva = Box_Edit_password.PasswordValue.Trim();
+                string passNuevaRepetida = Box_Edit_Repit_password.PasswordValue.Trim();
+
+                bool actualizado = _actualizarUsuarioUseCase.Ejecutar(
+                    _usuarioEnEdicion,
+                    passAnterior,
+                    passNueva,
+                    passNuevaRepetida
+                );
+
+                if (!actualizado)
+                    throw new Exception("No se pudo actualizar el usuario.");
+
+                MessageBox.Show("Usuario actualizado correctamente.",
+                    "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                userTable.CargarDatos();
+                tabConfiguraciones.SelectedTab = tab_PanelAdministracionU;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al actualizar usuario: " + ex.Message);
+            }
+        }
 
         // ============================================
         // ⚙️ MÉTODOS PRIVADOS
@@ -227,6 +286,11 @@ namespace Prueba1_Login.Views
         private void CargarPerfilesUsuarios()
         {
             comboBox_Pefl_Users.DataSource = Enum.GetValues(typeof(PerfilUsuario));
+        }
+
+        private void CargarPerfilesModificacion()
+        {
+            comboBox_Mod_Perfil.DataSource = Enum.GetValues(typeof(PerfilUsuario));
         }
 
         private string GenerarCodigoUsuario()
@@ -243,5 +307,6 @@ namespace Prueba1_Login.Views
             txtCre_Repit_password.Text = "";
             comboBox_Pefl_Users.SelectedIndex = -1;
         }
+
     }
 }

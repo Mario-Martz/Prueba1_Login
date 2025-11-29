@@ -6,6 +6,6 @@
         Vacios,
         UsuarioIncorrecto,
         ContraseñaIncorrecta,
-        ErrorConexion  // ✅ NUEVO: Para errores de conexión a BD
+        ErrorConexion  //Para errores de conexión a BD
     }
 }

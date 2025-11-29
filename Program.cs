@@ -48,8 +48,8 @@ namespace Prueba1_Login
             }
 
             // ▶️ Iniciar la aplicación normalmente
-            //Application.Run(new Login());
-            Application.Run(new Dashboard());
+            Application.Run(new Login());
+            //Application.Run(new Dashboard());
 
         }
 

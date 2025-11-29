@@ -25,13 +25,13 @@ namespace Prueba1_Login.Froms
 
         private void Dashboard_Load(object? sender, EventArgs e)
         {
-           // AplicarPermisos();
+           AplicarPermisos();
         }
 
         // ===========================================================
         // 🔥 PERMISOS BASADOS EN PERFIL DESDE BD
         // ===========================================================
-        /*
+       
         private void AplicarPermisos()
         {
             string perfil = SessionManager.Perfil?.Trim().ToUpper() ?? "";
@@ -63,7 +63,7 @@ namespace Prueba1_Login.Froms
                 btn_Sig_Zodiaco.Enabled = false;
             }
         }
-        */
+        
 
         // ===========================================================
         // MENÚ Y RESTO DE TU DASHBOARD (SIN CAMBIOS)

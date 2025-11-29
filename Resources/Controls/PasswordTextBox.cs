@@ -18,6 +18,25 @@ namespace Prueba1_Login.Resources.Controls
         private Color borderColor = Color.LightGray;
         private Color borderFocusColor = Color.DeepSkyBlue;
 
+        // -------------------------
+        // NUEVA PROPIEDAD LABELTEXT
+        // -------------------------
+        private string placeholderText = "Contraseña...";
+
+        [Category("Appearance")]
+        [Description("Texto que se muestra como placeholder en el cuadro de contraseña.")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        public string LabelText
+        {
+            get => placeholderText;
+            set
+            {
+                placeholderText = value;
+                try { textBox.PlaceholderText = value; } catch { }
+                Invalidate();
+            }
+        }
+
         private bool IsInDesignMode =>
             LicenseManager.UsageMode == LicenseUsageMode.Designtime ||
             Process.GetCurrentProcess().ProcessName.Equals("devenv", StringComparison.OrdinalIgnoreCase);
@@ -25,10 +44,7 @@ namespace Prueba1_Login.Resources.Controls
         public PasswordTextBox()
         {
             DoubleBuffered = true;
-
-            // 🔥 Fondo sólido obligatorio (soluciona el error)
             BackColor = Color.White;
-
             Size = new Size(280, 36);
 
             textBox = new TextBox
@@ -36,16 +52,17 @@ namespace Prueba1_Login.Resources.Controls
                 BorderStyle = BorderStyle.None,
                 Font = new Font("Segoe UI", 11f),
                 ForeColor = Color.Black,
-                BackColor = Color.White,   // 🔥 Fondo sólido
+                BackColor = Color.White,
                 UseSystemPasswordChar = true,
                 Location = new Point(12, 9),
                 Width = Width - 50,
                 Anchor = AnchorStyles.Left | AnchorStyles.Right
             };
 
+            // Usa el placeholder dinámico
             if (!IsInDesignMode)
             {
-                try { textBox.PlaceholderText = "Contraseña..."; } catch { }
+                try { textBox.PlaceholderText = placeholderText; } catch { }
             }
 
             textBox.GotFocus += (s, e) => { isFocused = true; Invalidate(); };
@@ -57,7 +74,7 @@ namespace Prueba1_Login.Resources.Controls
                 Location = new Point(Width - 30, 6),
                 Cursor = Cursors.Hand,
                 SizeMode = PictureBoxSizeMode.StretchImage,
-                BackColor = Color.Transparent   // ← permitido en PictureBox
+                BackColor = Color.Transparent
             };
 
             LoadEyeIcon();
@@ -103,7 +120,7 @@ namespace Prueba1_Login.Resources.Controls
             eyeIcon.Location = new Point(Width - 30, (Height - 24) / 2);
         }
 
-        // ===== PROPIEDADES =====
+        // ------ PROPIEDAD PASSWORDVALUE -----
 
         [Category("Data")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
@@ -113,7 +130,7 @@ namespace Prueba1_Login.Resources.Controls
             set => textBox.Text = value;
         }
 
-        // ===== DIBUJO SIN TRANSPARENCIA =====
+        // --------------- DIBUJO ----------------
 
         protected override void OnPaint(PaintEventArgs e)
         {
@@ -129,7 +146,7 @@ namespace Prueba1_Login.Resources.Controls
 
             using (GraphicsPath path = RoundedRect(rect, radius))
             using (Pen pen = new Pen(border, 1.5f))
-            using (SolidBrush brush = new SolidBrush(Color.White)) // 🔥 SIEMPRE BLANCO
+            using (SolidBrush brush = new SolidBrush(Color.White))
             {
                 g.FillPath(brush, path);
                 g.DrawPath(pen, path);

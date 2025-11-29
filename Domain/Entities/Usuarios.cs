@@ -16,7 +16,5 @@
         // ===================================
         public string PasswordHash { get; set; } // Contraseña hasheada
         public string PasswordSalt { get; set; } // Salt para el hash
-
-        // NOTA: El campo 'Contrasena' (inseguro) ha sido ELIMINADO.
     }
 }

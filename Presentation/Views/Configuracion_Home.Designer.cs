@@ -32,12 +32,16 @@ namespace Prueba1_Login.Views
         private void InitializeComponent()
         {
             tab_ModificarU = new TabPage();
+            Box_Edit_Repit_password = new PasswordTextBox();
+            comboBox_Mod_Perfil = new ComboBox();
+            label2 = new Label();
+            label1 = new Label();
             btn_cancelEditUser = new CustomIconButton();
             btn_Modi_User = new CustomIconButton();
             TextBoxMod_Apell_M = new FormTextBox();
             TextBoxMod_Apell_P = new FormTextBox();
-            Box_Edit_Repit_password = new PasswordTextBox();
             Box_Edit_password = new PasswordTextBox();
+            Box_Edit_password_after = new PasswordTextBox();
             TextBoxMod_Nombre = new FormTextBox();
             tab_CrearUusuario = new TabPage();
             comboBox_Pefl_Users = new ComboBox();
@@ -63,12 +67,16 @@ namespace Prueba1_Login.Views
             // 
             // tab_ModificarU
             // 
+            tab_ModificarU.Controls.Add(Box_Edit_Repit_password);
+            tab_ModificarU.Controls.Add(comboBox_Mod_Perfil);
+            tab_ModificarU.Controls.Add(label2);
+            tab_ModificarU.Controls.Add(label1);
             tab_ModificarU.Controls.Add(btn_cancelEditUser);
             tab_ModificarU.Controls.Add(btn_Modi_User);
             tab_ModificarU.Controls.Add(TextBoxMod_Apell_M);
             tab_ModificarU.Controls.Add(TextBoxMod_Apell_P);
-            tab_ModificarU.Controls.Add(Box_Edit_Repit_password);
             tab_ModificarU.Controls.Add(Box_Edit_password);
+            tab_ModificarU.Controls.Add(Box_Edit_password_after);
             tab_ModificarU.Controls.Add(TextBoxMod_Nombre);
             tab_ModificarU.Location = new Point(4, 24);
             tab_ModificarU.Name = "tab_ModificarU";
@@ -76,6 +84,46 @@ namespace Prueba1_Login.Views
             tab_ModificarU.TabIndex = 3;
             tab_ModificarU.Text = "Modificar Usuario";
             tab_ModificarU.UseVisualStyleBackColor = true;
+            // 
+            // Box_Edit_Repit_password
+            // 
+            Box_Edit_Repit_password.BackColor = Color.White;
+            Box_Edit_Repit_password.LabelText = "Repetir Contraseña...";
+            Box_Edit_Repit_password.Location = new Point(60, 480);
+            Box_Edit_Repit_password.Name = "Box_Edit_Repit_password";
+            Box_Edit_Repit_password.PasswordValue = "";
+            Box_Edit_Repit_password.Size = new Size(345, 36);
+            Box_Edit_Repit_password.TabIndex = 31;
+            // 
+            // comboBox_Mod_Perfil
+            // 
+            comboBox_Mod_Perfil.FormattingEnabled = true;
+            comboBox_Mod_Perfil.Location = new Point(530, 130);
+            comboBox_Mod_Perfil.Name = "comboBox_Mod_Perfil";
+            comboBox_Mod_Perfil.Size = new Size(150, 23);
+            comboBox_Mod_Perfil.TabIndex = 30;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.FlatStyle = FlatStyle.Flat;
+            label2.Font = new Font("Georgia", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label2.Location = new Point(530, 200);
+            label2.Name = "label2";
+            label2.Size = new Size(288, 29);
+            label2.TabIndex = 29;
+            label2.Text = "Fecha de modificacion";
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.FlatStyle = FlatStyle.Flat;
+            label1.Font = new Font("Segoe UI Semibold", 27.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label1.Location = new Point(3, 3);
+            label1.Name = "label1";
+            label1.Size = new Size(318, 50);
+            label1.TabIndex = 28;
+            label1.Text = "Modificar usuario";
             // 
             // btn_cancelEditUser
             // 
@@ -90,7 +138,7 @@ namespace Prueba1_Login.Views
             btn_cancelEditUser.Icon = Resources.Properties.Resources.cancel;
             btn_cancelEditUser.IconPadding = 10;
             btn_cancelEditUser.IconSize = 20;
-            btn_cancelEditUser.Location = new Point(839, 27);
+            btn_cancelEditUser.Location = new Point(850, 13);
             btn_cancelEditUser.Name = "btn_cancelEditUser";
             btn_cancelEditUser.Size = new Size(120, 40);
             btn_cancelEditUser.TabIndex = 27;
@@ -112,7 +160,7 @@ namespace Prueba1_Login.Views
             btn_Modi_User.Icon = Resources.Properties.Resources.edit;
             btn_Modi_User.IconPadding = 10;
             btn_Modi_User.IconSize = 20;
-            btn_Modi_User.Location = new Point(820, 500);
+            btn_Modi_User.Location = new Point(831, 502);
             btn_Modi_User.Name = "btn_Modi_User";
             btn_Modi_User.Size = new Size(139, 47);
             btn_Modi_User.TabIndex = 26;
@@ -120,6 +168,7 @@ namespace Prueba1_Login.Views
             btn_Modi_User.Text = "Modificar Usuario";
             btn_Modi_User.TextColor = Color.White;
             btn_Modi_User.UseVisualStyleBackColor = false;
+            btn_Modi_User.Click += btn_Modi_User_Click;
             // 
             // TextBoxMod_Apell_M
             // 
@@ -151,23 +200,25 @@ namespace Prueba1_Login.Views
             TextBoxMod_Apell_P.TextAlign = HorizontalAlignment.Left;
             TextBoxMod_Apell_P.TextColor = Color.Black;
             // 
-            // Box_Edit_Repit_password
-            // 
-            Box_Edit_Repit_password.BackColor = Color.White;
-            Box_Edit_Repit_password.Location = new Point(60, 410);
-            Box_Edit_Repit_password.Name = "Box_Edit_Repit_password";
-            Box_Edit_Repit_password.PasswordValue = "";
-            Box_Edit_Repit_password.Size = new Size(345, 36);
-            Box_Edit_Repit_password.TabIndex = 23;
-            // 
             // Box_Edit_password
             // 
             Box_Edit_password.BackColor = Color.White;
-            Box_Edit_password.Location = new Point(60, 340);
+            Box_Edit_password.LabelText = "Nueva Contraseña...";
+            Box_Edit_password.Location = new Point(60, 410);
             Box_Edit_password.Name = "Box_Edit_password";
             Box_Edit_password.PasswordValue = "";
             Box_Edit_password.Size = new Size(345, 36);
-            Box_Edit_password.TabIndex = 22;
+            Box_Edit_password.TabIndex = 23;
+            // 
+            // Box_Edit_password_after
+            // 
+            Box_Edit_password_after.BackColor = Color.White;
+            Box_Edit_password_after.LabelText = "Contraseña anterior...";
+            Box_Edit_password_after.Location = new Point(60, 340);
+            Box_Edit_password_after.Name = "Box_Edit_password_after";
+            Box_Edit_password_after.PasswordValue = "";
+            Box_Edit_password_after.Size = new Size(345, 36);
+            Box_Edit_password_after.TabIndex = 22;
             // 
             // TextBoxMod_Nombre
             // 
@@ -206,9 +257,9 @@ namespace Prueba1_Login.Views
             // comboBox_Pefl_Users
             // 
             comboBox_Pefl_Users.FormattingEnabled = true;
-            comboBox_Pefl_Users.Location = new Point(652, 130);
+            comboBox_Pefl_Users.Location = new Point(530, 130);
             comboBox_Pefl_Users.Name = "comboBox_Pefl_Users";
-            comboBox_Pefl_Users.Size = new Size(121, 23);
+            comboBox_Pefl_Users.Size = new Size(150, 23);
             comboBox_Pefl_Users.TabIndex = 23;
             // 
             // cancelar_CretUser
@@ -289,6 +340,7 @@ namespace Prueba1_Login.Views
             // txtCre_Repit_password
             // 
             txtCre_Repit_password.BackColor = Color.White;
+            txtCre_Repit_password.LabelText = "Repetor Contraseña...";
             txtCre_Repit_password.Location = new Point(60, 410);
             txtCre_Repit_password.Name = "txtCre_Repit_password";
             txtCre_Repit_password.PasswordValue = "";
@@ -298,6 +350,7 @@ namespace Prueba1_Login.Views
             // txtCre_password
             // 
             txtCre_password.BackColor = Color.White;
+            txtCre_password.LabelText = "Contraseña...";
             txtCre_password.Location = new Point(60, 340);
             txtCre_password.Name = "txtCre_password";
             txtCre_password.PasswordValue = "";
@@ -324,7 +377,7 @@ namespace Prueba1_Login.Views
             label_fechaCreacion.AutoSize = true;
             label_fechaCreacion.FlatStyle = FlatStyle.Flat;
             label_fechaCreacion.Font = new Font("Georgia", 18F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label_fechaCreacion.Location = new Point(539, 200);
+            label_fechaCreacion.Location = new Point(530, 200);
             label_fechaCreacion.Name = "label_fechaCreacion";
             label_fechaCreacion.Size = new Size(234, 29);
             label_fechaCreacion.TabIndex = 15;
@@ -417,6 +470,7 @@ namespace Prueba1_Login.Views
             Name = "Configuracion_Home";
             Text = "Configuracion_Home";
             tab_ModificarU.ResumeLayout(false);
+            tab_ModificarU.PerformLayout();
             tab_CrearUusuario.ResumeLayout(false);
             tab_CrearUusuario.PerformLayout();
             tab_PanelAdministracionU.ResumeLayout(false);
@@ -445,8 +499,8 @@ namespace Prueba1_Login.Views
             private FormTextBox txtCre__Apell_M;
             private FormTextBox txtCre__Apell_P;
 
+            private PasswordTextBox Box_Edit_password_after;
             private PasswordTextBox Box_Edit_password;
-            private PasswordTextBox Box_Edit_Repit_password;
 
             private ComboBox comboBox_Pefl_Users;
 
@@ -462,5 +516,9 @@ namespace Prueba1_Login.Views
             private PasswordTextBox txtCre_Repit_password;
             private CustomIconButton btn_Modi_User;
             private CustomIconButton btn_cancelEditUser;
+        private ComboBox comboBox_Mod_Perfil;
+        private Label label2;
+        private Label label1;
+        private PasswordTextBox Box_Edit_Repit_password;
     }
 }
