@@ -130,7 +130,7 @@ namespace Prueba1_Login.Views
         // =====================================================
         // 🔵 ABRIR ARCHIVO Y PROCESAR
         // =====================================================
-        private void btn_CargarCalendario_Click(object sender, EventArgs e)
+        private void btn_CargraCalendario_Click(object sender, EventArgs e)
         {
             try
             {
