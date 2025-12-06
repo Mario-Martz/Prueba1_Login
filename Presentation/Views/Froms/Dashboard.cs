@@ -25,7 +25,7 @@ namespace Prueba1_Login.Froms
 
         private void Dashboard_Load(object? sender, EventArgs e)
         {
-           AplicarPermisos();
+          AplicarPermisos();
         }
 
         // ===========================================================

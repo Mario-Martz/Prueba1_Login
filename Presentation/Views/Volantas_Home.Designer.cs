@@ -33,16 +33,19 @@
             label2 = new Label();
             label_Estructura_premios = new Label();
             tabPage2 = new TabPage();
+            dataView_Calendario = new DataGridView();
+            label1 = new Label();
+            btn_CargraCalendario = new Prueba1_Login.Resources.Controls.CustomIconButton();
             comboBox1 = new ComboBox();
             customIconButton1 = new Prueba1_Login.Resources.Controls.CustomIconButton();
             dateLabelPicker2 = new CustomControls.DateLabelPicker();
             dateLabelPicker1 = new CustomControls.DateLabelPicker();
             label_Calendario_Sorteos = new Label();
             tabPage3 = new TabPage();
-            customIconButton2 = new Prueba1_Login.Resources.Controls.CustomIconButton();
             tabVolantas.SuspendLayout();
             tabPage1.SuspendLayout();
             tabPage2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataView_Calendario).BeginInit();
             SuspendLayout();
             // 
             // tabVolantas
@@ -89,7 +92,9 @@
             // 
             // tabPage2
             // 
-            tabPage2.Controls.Add(customIconButton2);
+            tabPage2.Controls.Add(dataView_Calendario);
+            tabPage2.Controls.Add(label1);
+            tabPage2.Controls.Add(btn_CargraCalendario);
             tabPage2.Controls.Add(comboBox1);
             tabPage2.Controls.Add(customIconButton1);
             tabPage2.Controls.Add(dateLabelPicker2);
@@ -103,10 +108,51 @@
             tabPage2.Text = "Calendario de sorteos";
             tabPage2.UseVisualStyleBackColor = true;
             // 
+            // dataView_Calendario
+            // 
+            dataView_Calendario.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataView_Calendario.Location = new Point(8, 107);
+            dataView_Calendario.Name = "dataView_Calendario";
+            dataView_Calendario.Size = new Size(809, 433);
+            dataView_Calendario.TabIndex = 7;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 16F);
+            label1.Location = new Point(662, 52);
+            label1.Name = "label1";
+            label1.Size = new Size(155, 30);
+            label1.TabIndex = 6;
+            label1.Text = "Tipo de sorteo";
+            // 
+            // btn_CargraCalendario
+            // 
+            btn_CargraCalendario.BackColor = Color.FromArgb(0, 123, 255);
+            btn_CargraCalendario.BaseColor = Color.FromArgb(0, 123, 255);
+            btn_CargraCalendario.BorderRadius = 10;
+            btn_CargraCalendario.FlatAppearance.BorderSize = 0;
+            btn_CargraCalendario.FlatStyle = FlatStyle.Flat;
+            btn_CargraCalendario.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            btn_CargraCalendario.ForeColor = Color.White;
+            btn_CargraCalendario.FuentePersonalizada = Resources.Fonts_Personalizados.AppFont.MontserratBold;
+            btn_CargraCalendario.Icon = Resources.Properties.Resources.add;
+            btn_CargraCalendario.IconPadding = 10;
+            btn_CargraCalendario.IconSize = 20;
+            btn_CargraCalendario.Location = new Point(8, 546);
+            btn_CargraCalendario.Name = "btn_CargraCalendario";
+            btn_CargraCalendario.Size = new Size(139, 40);
+            btn_CargraCalendario.TabIndex = 5;
+            btn_CargraCalendario.TamañoFuente = 11F;
+            btn_CargraCalendario.Text = "Cargra calendario";
+            btn_CargraCalendario.TextColor = Color.White;
+            btn_CargraCalendario.UseVisualStyleBackColor = false;
+            btn_CargraCalendario.Click += btn_CargraCalendario_Click;
+            // 
             // comboBox1
             // 
             comboBox1.FormattingEnabled = true;
-            comboBox1.Location = new Point(737, 59);
+            comboBox1.Location = new Point(849, 56);
             comboBox1.Name = "comboBox1";
             comboBox1.Size = new Size(121, 23);
             comboBox1.TabIndex = 4;
@@ -139,7 +185,7 @@
             dateLabelPicker2.DatePickerVisible = true;
             dateLabelPicker2.LabelText = "Fecha fin";
             dateLabelPicker2.LabelVisible = true;
-            dateLabelPicker2.Location = new Point(350, 53);
+            dateLabelPicker2.Location = new Point(350, 48);
             dateLabelPicker2.Name = "dateLabelPicker2";
             dateLabelPicker2.Size = new Size(330, 40);
             dateLabelPicker2.Spacing = 90;
@@ -151,7 +197,7 @@
             dateLabelPicker1.DatePickerVisible = true;
             dateLabelPicker1.LabelText = "Fecha inicio";
             dateLabelPicker1.LabelVisible = true;
-            dateLabelPicker1.Location = new Point(8, 53);
+            dateLabelPicker1.Location = new Point(8, 48);
             dateLabelPicker1.Name = "dateLabelPicker1";
             dateLabelPicker1.Size = new Size(330, 40);
             dateLabelPicker1.Spacing = 90;
@@ -178,28 +224,6 @@
             tabPage3.Text = "Loteria tradicional";
             tabPage3.UseVisualStyleBackColor = true;
             // 
-            // customIconButton2
-            // 
-            customIconButton2.BackColor = Color.FromArgb(0, 123, 255);
-            customIconButton2.BaseColor = Color.FromArgb(0, 123, 255);
-            customIconButton2.BorderRadius = 10;
-            customIconButton2.FlatAppearance.BorderSize = 0;
-            customIconButton2.FlatStyle = FlatStyle.Flat;
-            customIconButton2.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            customIconButton2.ForeColor = Color.White;
-            customIconButton2.FuentePersonalizada = Resources.Fonts_Personalizados.AppFont.MontserratBold;
-            customIconButton2.Icon = Resources.Properties.Resources.add;
-            customIconButton2.IconPadding = 10;
-            customIconButton2.IconSize = 20;
-            customIconButton2.Location = new Point(679, 131);
-            customIconButton2.Name = "customIconButton2";
-            customIconButton2.Size = new Size(139, 40);
-            customIconButton2.TabIndex = 5;
-            customIconButton2.TamañoFuente = 11F;
-            customIconButton2.Text = "Cargra calendario";
-            customIconButton2.TextColor = Color.White;
-            customIconButton2.UseVisualStyleBackColor = false;
-            // 
             // Volantas_Home
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -215,6 +239,7 @@
             tabPage1.PerformLayout();
             tabPage2.ResumeLayout(false);
             tabPage2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dataView_Calendario).EndInit();
             ResumeLayout(false);
         }
 
@@ -231,6 +256,8 @@
         private CustomControls.DateLabelPicker dateLabelPicker1;
         private ComboBox comboBox1;
         private Resources.Controls.CustomIconButton customIconButton1;
-        private Resources.Controls.CustomIconButton customIconButton2;
+        private Resources.Controls.CustomIconButton btn_CargraCalendario;
+        private Label label1;
+        private DataGridView dataView_Calendario;
     }
 }
