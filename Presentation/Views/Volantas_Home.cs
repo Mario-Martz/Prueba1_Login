@@ -77,16 +77,16 @@ namespace Prueba1_Login.Views
 
             var columnas = new[]
             {
-                new { Name = "IdTipoSorteo", Header = "IdTipo Sorteo.", Width = 115 },
-                new { Name = "NumeroSorteo", Header = "Núm. Sorteo.", Width = 110 },
-                new { Name = "NumeroInterno", Header = "NúmInterno", Width = 85 },
+                new { Name = "IdTipoSorteo", Header = "IdTipo Sorteo.", Width = 110 },
+                new { Name = "NumeroSorteo", Header = "Núm. Sorteo.", Width = 100 },
+                new { Name = "NumeroInterno", Header = "NúmInterno", Width = 83 },
                 new { Name = "EmisionSerie", Header = "EmisiónSerie", Width = 95 },
                 new { Name = "NumeroSeries", Header = "Núm. Series", Width = 95 },
-                new { Name = "FechaCelebracion", Header = "Fecha Celebracion", Width = 100 },
-                new { Name = "ValorEntero", Header = "ValorEntero", Width = 95 },
-                new { Name = "Estatus", Header = "Estatus", Width = 60 },
-                new { Name = "BilleteInicial", Header = "Billete Inic.", Width = 100 },
-                new { Name = "BilleteFinal", Header = "Billete Fin.", Width = 100 }
+                new { Name = "FechaCelebracion", Header = "Fecha Celebracion", Width = 135 },
+                new { Name = "ValorEntero", Header = "ValorEntero", Width = 90 },
+                new { Name = "Estatus", Header = "Estatus", Width = 70 },
+                new { Name = "BilleteInicial", Header = "Billete Inic.", Width = 90 },
+                new { Name = "BilleteFinal", Header = "Billete Fin.", Width = 90 }
             };
 
             foreach (var col in columnas)
