@@ -10,6 +10,13 @@ namespace Prueba1_Login.Infrastructure.Data
     {
         private static readonly string? connectionString;
 
+        // ======================================
+        //   ⭐ NUEVA PROPIEDAD PÚBLICA ⭐
+        // ======================================
+        public static string ConnectionString
+            => connectionString ?? throw new Exception("ConnectionString no fue inicializada.");
+
+
         // ==============================
         //   Constructor estático
         // ==============================
@@ -20,7 +27,6 @@ namespace Prueba1_Login.Infrastructure.Data
                 string baseDir = AppDomain.CurrentDomain.BaseDirectory;
                 string envPath = Path.Combine(baseDir, ".env");
 
-                // 🔹 En entorno de desarrollo el .env suele estar más arriba
                 if (!File.Exists(envPath))
                 {
                     string altPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\.env");
@@ -31,7 +37,6 @@ namespace Prueba1_Login.Infrastructure.Data
                 if (!File.Exists(envPath))
                     throw new FileNotFoundException($"No se encontró el archivo .env en: {envPath}");
 
-                // Cargar variables del archivo .env
                 Env.Load(envPath);
 
                 string user = Env.GetString("DB_USER");
@@ -40,7 +45,6 @@ namespace Prueba1_Login.Infrastructure.Data
                 string port = Env.GetString("DB_PORT");
                 string service = Env.GetString("DB_SERVICE");
 
-                // Validar variables requeridas
                 if (string.IsNullOrWhiteSpace(user) ||
                     string.IsNullOrWhiteSpace(pass) ||
                     string.IsNullOrWhiteSpace(host) ||
@@ -50,7 +54,6 @@ namespace Prueba1_Login.Infrastructure.Data
                     throw new Exception("Faltan variables requeridas en el archivo .env");
                 }
 
-                // Construir cadena de conexión
                 connectionString =
                     $"User Id={user};Password={pass};Data Source=" +
                     $"(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={host})(PORT={port}))" +
@@ -86,8 +89,6 @@ namespace Prueba1_Login.Infrastructure.Data
                 using var conn = GetConnection();
                 conn.Open();
 
-                Console.WriteLine("✔ Conexión a Oracle establecida correctamente.");
-
                 MessageBox.Show(
                     "✔ Conexión a Oracle establecida correctamente.",
                     "Conexión a BD",
@@ -99,8 +100,6 @@ namespace Prueba1_Login.Infrastructure.Data
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error al conectar a Oracle: {ex.Message}");
-
                 MessageBox.Show(
                     $"❌ Error al conectar a Oracle:\n\n{ex.Message}",
                     "Error de conexión",

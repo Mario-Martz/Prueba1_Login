@@ -8,7 +8,9 @@ namespace Prueba1_Login.Domain.Interfaces
     {
         void InsertarLista(IEnumerable<CalendarioSorteos> lista);
         IEnumerable<CalendarioSorteos> Buscar(DateTime inicio, DateTime fin, int tipoSorteo);
+
+        // 👇 AGREGA ESTOS (faltaban)
+        int ContarRegistros();
+        void EliminarTodo();
     }
-
 }
-

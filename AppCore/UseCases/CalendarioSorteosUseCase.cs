@@ -1,328 +1,139 @@
 ﻿using Prueba1_Login.Domain.Entities;
 using Prueba1_Login.Domain.Interfaces;
 using System.Globalization;
+using System.Windows.Forms;
 
 namespace Prueba1_Login.Domain.UseCases
 {
     public class CargarCalendarioUseCase
     {
-        private readonly ICalendarioSorteosRepository _repo;
+        private readonly ICalendarioSorteosRepository _repository;
 
-        public CargarCalendarioUseCase(ICalendarioSorteosRepository repo)
+        public ICalendarioSorteosRepository Repository => _repository;
+
+        public CargarCalendarioUseCase(ICalendarioSorteosRepository repository)
         {
-            _repo = repo;
+            _repository = repository;
         }
 
-        public List<CalendarioSorteos> Ejecutar(string rutaTxt)
+        // =============================================
+        // 🔵 MÉTODO PRINCIPAL: CARGAR ARCHIVO
+        // =============================================
+        public List<CalendarioSorteos> Ejecutar(string rutaArchivo)
+        {
+            // 1. Verificar si hay datos existentes
+            int existentes = _repository.ContarRegistros();
+
+            if (existentes > 0)
+            {
+                var resp = MessageBox.Show(
+                    $"La tabla CALENDARIO_SORTEOS contiene {existentes} registros.\n\n" +
+                    $"¿Deseas ELIMINARLOS antes de cargar el nuevo archivo?",
+                    "Datos existentes",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
+
+                if (resp == DialogResult.Yes)
+                {
+                    _repository.EliminarTodo();
+                }
+            }
+
+            // 2. Cargar archivo
+            var lineas = File.ReadAllLines(rutaArchivo);
+            var lista = ParsearLineas(lineas);
+
+            // 3. Insertar nueva lista
+            _repository.InsertarLista(lista);
+
+            return lista;
+        }
+
+        // =============================================
+        // 🔵 PARSEO DE LÍNEAS
+        // =============================================
+        private List<CalendarioSorteos> ParsearLineas(string[] lineas)
         {
             var lista = new List<CalendarioSorteos>();
 
-            try
+            foreach (var linea in lineas)
             {
-                var lineas = File.ReadAllLines(rutaTxt);
+                if (string.IsNullOrWhiteSpace(linea))
+                    continue;
 
-                foreach (var linea in lineas)
-                {
-                    if (string.IsNullOrWhiteSpace(linea))
-                        continue;
+                if (linea.Length < 57)
+                    throw new Exception($"La línea no cumple los 57 caracteres: (len {linea.Length}) {linea}");
 
-                    try
-                    {
-                        var item = ParsearLinea(linea.Trim());
-                        if (item != null)
-                        {
-                            lista.Add(item);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        // Registrar pero continuar
-                        Console.WriteLine($"Advertencia: Error en línea '{linea}': {ex.Message}");
-                    }
-                }
-
-                // Guardar en BD solo si tenemos repositorio y datos
-                if (lista.Any() && _repo != null)
-                {
-                    _repo.InsertarLista(lista);
-                }
-
-                return lista;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error al procesar archivo: {ex.Message}", ex);
-            }
-        }
-
-        private CalendarioSorteos? ParsearLinea(string linea)
-        {
-            // Eliminar espacios y caracteres no deseados
-            linea = linea.Trim();
-
-            // Si la línea está vacía o es demasiado corta, ignorar
-            if (string.IsNullOrEmpty(linea) || linea.Length < 10)
-                return null;
-
-            var item = new CalendarioSorteos();
-
-            try
-            {
-                // Intentar diferentes formatos
-
-                // FORMATO 1: Con separador de pipe (|)
-                if (linea.Contains('|'))
-                {
-                    return ParsearConPipe(linea);
-                }
-                // FORMATO 2: Longitud fija (como en el ejemplo anterior)
-                else if (linea.Length >= 65)
-                {
-                    return ParsearLongitudFija(linea);
-                }
-                // FORMATO 3: Otro formato (como el del error)
-                else
-                {
-                    return ParsearFormatoGenerico(linea);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new FormatException($"No se pudo parsear la línea: '{linea}'. Error: {ex.Message}");
-            }
-        }
-
-        private CalendarioSorteos ParsearConPipe(string linea)
-        {
-            var partes = linea.Split('|', StringSplitOptions.RemoveEmptyEntries);
-
-            if (partes.Length < 8)
-                throw new FormatException($"Muy pocas columnas: {partes.Length}");
-
-            var item = new CalendarioSorteos();
-
-            // Mapear según posición
-            if (partes.Length > 0) item.IdTipoSorteo = ParsearEntero(partes[0]);
-            if (partes.Length > 1) item.NumeroSorteo = ParsearEntero(partes[1]);
-            if (partes.Length > 2) item.NumeroInterno = ParsearEnteroOpcional(partes[2]);
-            if (partes.Length > 3) item.EmisionSerie = ParsearLongOpcional(partes[3]);
-            if (partes.Length > 4) item.NumeroSeries = ParsearEnteroOpcional(partes[4]);
-            if (partes.Length > 5) item.FechaCelebracion = ParsearFecha(partes[5]);
-            if (partes.Length > 6) item.ValorEntero = ParsearDecimalOpcional(partes[6]);
-            if (partes.Length > 7) item.Estatus = ParsearEstatus(partes[7]);
-            if (partes.Length > 8) item.BilleteInicial = ParsearLongOpcional(partes[8]);
-            if (partes.Length > 9) item.BilleteFinal = ParsearLongOpcional(partes[9]);
-
-            return item;
-        }
-
-        private CalendarioSorteos ParsearLongitudFija(string linea)
-        {
-            // Formato: 022863310000600207/11/2025000800D000000001000060000000040
-            var item = new CalendarioSorteos();
-
-            try
-            {
-                // Posiciones según el formato anterior
-                if (linea.Length >= 2)
-                    item.IdTipoSorteo = int.Parse(linea.Substring(0, 2));
-
-                if (linea.Length >= 8)
-                    item.NumeroSorteo = int.Parse(linea.Substring(2, 6));
-
-                // Buscar fecha en formato dd/MM/yyyy
-                for (int i = 0; i <= linea.Length - 10; i++)
-                {
-                    if (EsFechaValida(linea.Substring(i, 10)))
-                    {
-                        item.FechaCelebracion = DateTime.ParseExact(
-                            linea.Substring(i, 10),
-                            "dd/MM/yyyy",
-                            CultureInfo.InvariantCulture);
-                        break;
-                    }
-                }
-
-                // Buscar estatus (D, B, X)
-                foreach (char c in new[] { 'D', 'B', 'X' })
-                {
-                    if (linea.Contains(c))
-                    {
-                        item.Estatus = c.ToString();
-                        break;
-                    }
-                }
-
-                // Si no se encontró estatus, usar por defecto
-                if (string.IsNullOrEmpty(item.Estatus))
-                    item.Estatus = "U";
-
-                return item;
-            }
-            catch
-            {
-                throw new FormatException("Formato de longitud fija no reconocido");
-            }
-        }
-
-        private CalendarioSorteos ParsearFormatoGenerico(string linea)
-        {
-            // Para líneas como: "102255000000000007111202500080000000000100006000000"
-            var item = new CalendarioSorteos();
-
-            // Intentar extraer información básica
-            // Asumir que los primeros 2 dígitos son IdTipoSorteo
-            if (linea.Length >= 2 && int.TryParse(linea.Substring(0, 2), out int idTipo))
-                item.IdTipoSorteo = idTipo;
-
-            // Buscar patrones numéricos que podrían ser fechas
-            // Buscar secuencia de 8 dígitos que podría ser fecha compacta
-            for (int i = 0; i <= linea.Length - 8; i++)
-            {
-                string segmento = linea.Substring(i, 8);
-                if (int.TryParse(segmento, out int posibleFechaNum))
-                {
-                    // Intentar interpretar como ddmmyyyy
-                    if (posibleFechaNum >= 1010000 && posibleFechaNum <= 31129999)
-                    {
-                        try
-                        {
-                            string fechaStr = $"{segmento.Substring(0, 2)}/{segmento.Substring(2, 2)}/{segmento.Substring(4, 4)}";
-                            if (DateTime.TryParseExact(fechaStr, "dd/MM/yyyy",
-                                CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime fecha))
-                            {
-                                item.FechaCelebracion = fecha;
-                                break;
-                            }
-                        }
-                        catch
-                        {
-                            // Continuar buscando
-                        }
-                    }
-                }
+                lista.Add(ParsearLinea(linea));
             }
 
-            // Si no se pudo parsear fecha, usar fecha actual
-            if (item.FechaCelebracion == DateTime.MinValue)
-                item.FechaCelebracion = DateTime.Today;
+            return lista;
+        }
 
-            // Buscar estatus
-            foreach (char c in new[] { 'D', 'B', 'X', 'N', 'S' })
+        private CalendarioSorteos ParsearLinea(string linea)
+        {
+            // Extraer parte útil (0..50)
+            string s = linea.Substring(0, 51);
+
+            // Substrings según longitud correcta
+            string txtIdTipo = s.Substring(0, 2);
+            string txtNumSorteo = s.Substring(2, 4);
+            string txtInterno = s.Substring(6, 2);
+            string txtEmision = s.Substring(8, 6);
+            string txtNumSeries = s.Substring(14, 2);
+            string txtFecha = s.Substring(16, 10);
+            string txtValor = s.Substring(26, 6);
+            string txtEstatus = s.Substring(32, 1);
+            string txtBilleteInicial = s.Substring(33, 9);
+            string txtBilleteFinal = s.Substring(42, 9);
+
+            return new CalendarioSorteos
             {
-                if (linea.Contains(c))
-                {
-                    item.Estatus = c.ToString();
-                    break;
-                }
-            }
+                IdTipoSorteo = SafeInt(txtIdTipo),
+                NumeroSorteo = SafeInt(txtNumSorteo),
+                NumeroInterno = SafeNullableInt(txtInterno),
 
-            // Valor por defecto
-            if (string.IsNullOrEmpty(item.Estatus))
-                item.Estatus = "U";
+                EmisionSerie = SafeLong(txtEmision) * 1000L,
 
-            // Generar número de sorteo si no se pudo extraer
-            if (item.NumeroSorteo == 0 && linea.Length >= 8)
-            {
-                if (int.TryParse(linea.Substring(2, 6), out int numSorteo))
-                    item.NumeroSorteo = numSorteo;
-            }
+                NumeroSeries = SafeNullableInt(txtNumSeries),
 
-            return item;
+                FechaCelebracion = SafeDate(txtFecha) ?? DateTime.MinValue,
+
+                ValorEntero = SafeDecimal(txtValor),
+
+                Estatus = txtEstatus.Trim(),
+
+                BilleteInicial = SafeLong(txtBilleteInicial),
+                BilleteFinal = SafeLong(txtBilleteFinal)
+            };
         }
 
-        // ============================================
-        // 🔵 MÉTODOS AUXILIARES DE PARSEO
-        // ============================================
+        // =============================================
+        // 🔵 CONVERSORES SEGUROS
+        // =============================================
+        private int SafeInt(string s) =>
+            int.TryParse(s.Trim(), out var v) ? v : 0;
 
-        private bool EsFechaValida(string texto)
+        private int? SafeNullableInt(string s) =>
+            int.TryParse(s.Trim(), out var v) ? (int?)v : null;
+
+        private long SafeLong(string s) =>
+            long.TryParse(s.Trim(), out var v) ? v : 0;
+
+        private decimal SafeDecimal(string s) =>
+            decimal.TryParse(s.Trim(), NumberStyles.Number, CultureInfo.InvariantCulture, out var v) ? v : 0m;
+
+        private DateTime? SafeDate(string s)
         {
-            return DateTime.TryParseExact(texto, "dd/MM/yyyy",
-                CultureInfo.InvariantCulture, DateTimeStyles.None, out _);
-        }
+            if (DateTime.TryParseExact(s.Trim(), "dd/MM/yyyy",
+                CultureInfo.InvariantCulture, DateTimeStyles.None, out var d))
+                return d;
 
-        private int ParsearEntero(string texto)
-        {
-            texto = texto.Trim();
-            if (string.IsNullOrEmpty(texto)) return 0;
-
-            // Eliminar caracteres no numéricos
-            string numeros = new string(texto.Where(char.IsDigit).ToArray());
-            if (string.IsNullOrEmpty(numeros)) return 0;
-
-            return int.Parse(numeros);
-        }
-
-        private int? ParsearEnteroOpcional(string texto)
-        {
-            texto = texto.Trim();
-            if (string.IsNullOrEmpty(texto) || texto == "-" || texto.ToLower() == "null")
-                return null;
-
-            string numeros = new string(texto.Where(char.IsDigit).ToArray());
-            if (string.IsNullOrEmpty(numeros)) return null;
-
-            return int.Parse(numeros);
-        }
-
-        private long? ParsearLongOpcional(string texto)
-        {
-            texto = texto.Trim();
-            if (string.IsNullOrEmpty(texto) || texto == "-" || texto.ToLower() == "null")
-                return null;
-
-            string numeros = new string(texto.Where(char.IsDigit).ToArray());
-            if (string.IsNullOrEmpty(numeros)) return null;
-
-            return long.Parse(numeros);
-        }
-
-        private decimal? ParsearDecimalOpcional(string texto)
-        {
-            texto = texto.Trim();
-            if (string.IsNullOrEmpty(texto) || texto == "-" || texto.ToLower() == "null")
-                return null;
-
-            // Manejar formatos como "S800.00 D"
-            texto = texto.Replace("S", "").Replace("D", "").Replace("X", "").Replace("B", "").Trim();
-
-            if (decimal.TryParse(texto, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal resultado))
-                return resultado;
+            string clean = s.Trim();
+            if (DateTime.TryParse(clean, CultureInfo.InvariantCulture, DateTimeStyles.None, out d))
+                return d;
 
             return null;
-        }
-
-        private DateTime ParsearFecha(string texto)
-        {
-            texto = texto.Trim();
-
-            // Intentar diferentes formatos de fecha
-            string[] formatos = { "dd/MM/yyyy", "d/M/yyyy", "dd-MM-yyyy", "d-M-yyyy", "yyyyMMdd" };
-
-            foreach (var formato in formatos)
-            {
-                if (DateTime.TryParseExact(texto, formato, CultureInfo.InvariantCulture,
-                    DateTimeStyles.None, out DateTime fecha))
-                {
-                    return fecha;
-                }
-            }
-
-            // Si no se puede parsear, usar fecha actual
-            return DateTime.Today;
-        }
-
-        private string ParsearEstatus(string texto)
-        {
-            texto = texto.Trim().ToUpper();
-
-            if (texto.Contains("D")) return "D";
-            if (texto.Contains("B")) return "B";
-            if (texto.Contains("X")) return "X";
-            if (texto.Contains("N")) return "N";
-            if (texto.Contains("S")) return "S";
-
-            return "U"; // Desconocido
         }
     }
 }

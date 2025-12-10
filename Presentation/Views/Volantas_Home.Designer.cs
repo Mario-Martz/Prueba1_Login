@@ -113,14 +113,14 @@
             dataView_Calendario.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataView_Calendario.Location = new Point(8, 107);
             dataView_Calendario.Name = "dataView_Calendario";
-            dataView_Calendario.Size = new Size(809, 433);
+            dataView_Calendario.Size = new Size(962, 433);
             dataView_Calendario.TabIndex = 7;
             // 
             // label1
             // 
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI", 16F);
-            label1.Location = new Point(662, 52);
+            label1.Location = new Point(662, 62);
             label1.Name = "label1";
             label1.Size = new Size(155, 30);
             label1.TabIndex = 6;
@@ -152,7 +152,7 @@
             // comboBox1
             // 
             comboBox1.FormattingEnabled = true;
-            comboBox1.Location = new Point(849, 56);
+            comboBox1.Location = new Point(849, 66);
             comboBox1.Name = "comboBox1";
             comboBox1.Size = new Size(121, 23);
             comboBox1.TabIndex = 4;
@@ -170,7 +170,7 @@
             customIconButton1.Icon = Resources.Properties.Resources.search;
             customIconButton1.IconPadding = 10;
             customIconButton1.IconSize = 20;
-            customIconButton1.Location = new Point(860, 131);
+            customIconButton1.Location = new Point(860, 6);
             customIconButton1.Name = "customIconButton1";
             customIconButton1.Size = new Size(110, 40);
             customIconButton1.TabIndex = 3;
@@ -185,7 +185,7 @@
             dateLabelPicker2.DatePickerVisible = true;
             dateLabelPicker2.LabelText = "Fecha fin";
             dateLabelPicker2.LabelVisible = true;
-            dateLabelPicker2.Location = new Point(350, 48);
+            dateLabelPicker2.Location = new Point(350, 58);
             dateLabelPicker2.Name = "dateLabelPicker2";
             dateLabelPicker2.Size = new Size(330, 40);
             dateLabelPicker2.Spacing = 90;
@@ -197,7 +197,7 @@
             dateLabelPicker1.DatePickerVisible = true;
             dateLabelPicker1.LabelText = "Fecha inicio";
             dateLabelPicker1.LabelVisible = true;
-            dateLabelPicker1.Location = new Point(8, 48);
+            dateLabelPicker1.Location = new Point(8, 58);
             dateLabelPicker1.Name = "dateLabelPicker1";
             dateLabelPicker1.Size = new Size(330, 40);
             dateLabelPicker1.Spacing = 90;

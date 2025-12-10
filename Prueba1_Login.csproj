@@ -9,6 +9,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Infrastructure\Mappers\**" />
+    <Compile Remove="Presentation\Utils\**" />
+    <EmbeddedResource Remove="Infrastructure\Mappers\**" />
+    <EmbeddedResource Remove="Presentation\Utils\**" />
+    <None Remove="Infrastructure\Mappers\**" />
+    <None Remove="Presentation\Utils\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Resources\Fonts\Montserrat-Regular.ttf" />
     <None Remove="Resources\icons\eye_closed.png" />
     <None Remove="Resources\icons\eye_open.png" />
@@ -34,11 +43,6 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Infrastructure\Mappers\" />
-    <Folder Include="Presentation\Utils\" />
   </ItemGroup>
 
   <ItemGroup>

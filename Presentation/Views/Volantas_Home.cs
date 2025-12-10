@@ -10,15 +10,12 @@ namespace Prueba1_Login.Views
 {
     public partial class Volantas_Home : Form
     {
-        // Remueve esta línea: private readonly ProcesarCalendarioUseCase _useCase = new();
-        // En su lugar, declara sin inicializar
         private CargarCalendarioUseCase? _useCase;
 
         public Volantas_Home(int tabIndex = 0)
         {
             InitializeComponent();
 
-            // Inicializar el caso de uso cuando se necesite
             InicializarUseCase();
 
             FontManager.Initialize();
@@ -42,23 +39,18 @@ namespace Prueba1_Login.Views
         {
             try
             {
-                using var conn = DatabaseConnection.GetConnection();
-                string connectionString = conn.ConnectionString;
-
+                string connectionString = DatabaseConnection.ConnectionString;
                 var repository = new CalendarioRepository(connectionString);
+
                 _useCase = new CargarCalendarioUseCase(repository);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al inicializar: {ex.Message}", "Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error al inicializar: {ex.Message}",
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-
-        // ============================================
-        // 🔵 MÉTODOS GENERALES DEL FORM
-        // ============================================
         private void AplicarFuenteAControles(Control parent)
         {
             foreach (Control ctrl in parent.Controls)
@@ -77,27 +69,21 @@ namespace Prueba1_Login.Views
 
         private void ConfigurarDataGridView()
         {
-            // Configurar DataGridView llamado dataView_Calendario
-            if (dataView_Calendario == null)
-            {
-                MessageBox.Show("DataGridView 'dataView_Calendario' no encontrado", "Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
+            
+            dataView_Calendario.RowHeadersVisible = false;   // ⬅ Oculta el asterisco
+            dataView_Calendario.AllowUserToAddRows = false;  // ⬅ Evita fila de inserción manual
             dataView_Calendario.AutoGenerateColumns = false;
             dataView_Calendario.Columns.Clear();
 
-            // Configurar columnas
             var columnas = new[]
             {
-                new { Name = "IdTipoSorteo", Header = "Tipo Sort.", Width = 70 },
-                new { Name = "NumeroSorteo", Header = "Núm. Sort.", Width = 80 },
-                new { Name = "NumeroInterno", Header = "Interno", Width = 70 },
-                new { Name = "EmisionSerie", Header = "Emisión", Width = 90 },
-                new { Name = "NumeroSeries", Header = "Series", Width = 60 },
-                new { Name = "FechaCelebracion", Header = "Fecha", Width = 100 },
-                new { Name = "ValorEntero", Header = "Valor", Width = 80 },
+                new { Name = "IdTipoSorteo", Header = "IdTipo Sorteo.", Width = 115 },
+                new { Name = "NumeroSorteo", Header = "Núm. Sorteo.", Width = 110 },
+                new { Name = "NumeroInterno", Header = "NúmInterno", Width = 85 },
+                new { Name = "EmisionSerie", Header = "EmisiónSerie", Width = 95 },
+                new { Name = "NumeroSeries", Header = "Núm. Series", Width = 95 },
+                new { Name = "FechaCelebracion", Header = "Fecha Celebracion", Width = 100 },
+                new { Name = "ValorEntero", Header = "ValorEntero", Width = 95 },
                 new { Name = "Estatus", Header = "Estatus", Width = 60 },
                 new { Name = "BilleteInicial", Header = "Billete Inic.", Width = 100 },
                 new { Name = "BilleteFinal", Header = "Billete Fin.", Width = 100 }
@@ -105,7 +91,7 @@ namespace Prueba1_Login.Views
 
             foreach (var col in columnas)
             {
-                var dataColumn = new DataGridViewTextBoxColumn
+                var c = new DataGridViewTextBoxColumn
                 {
                     Name = col.Name,
                     HeaderText = col.Header,
@@ -113,64 +99,82 @@ namespace Prueba1_Login.Views
                     Width = col.Width
                 };
 
-                // Formato para columnas específicas
                 if (col.Name == "ValorEntero")
                 {
-                    dataColumn.DefaultCellStyle.Format = "N2";
+                    // ✔ Mostrar sin decimales (ej: 800 en vez de 8.00)
+                    c.DefaultCellStyle.Format = "N0";
                 }
                 else if (col.Name == "FechaCelebracion")
                 {
-                    dataColumn.DefaultCellStyle.Format = "dd/MM/yyyy";
+                    c.DefaultCellStyle.Format = "dd/MM/yyyy";
                 }
 
-                dataView_Calendario.Columns.Add(dataColumn);
+                dataView_Calendario.Columns.Add(c);
             }
         }
 
-        // =====================================================
-        // 🔵 ABRIR ARCHIVO Y PROCESAR
-        // =====================================================
         private void btn_CargraCalendario_Click(object sender, EventArgs e)
         {
             try
             {
                 if (_useCase == null)
                 {
-                    MessageBox.Show("No se pudo inicializar el sistema. Verifique la conexión a la base de datos.",
-                        "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Error al iniciar subsistema.", "Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
+                // ==================================
+                // VERIFICAR SI LA TABLA TIENE DATOS
+                // ==================================
+                int registros = _useCase.Repository.ContarRegistros();
+
+                if (registros > 0)
+                {
+                    var resp = MessageBox.Show(
+                        $"La tabla contiene {registros} registros.\n¿Deseas eliminarlos antes de cargar?",
+                        "Confirmar limpieza",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Warning);
+
+                    if (resp == DialogResult.Yes)
+                    {
+                        _useCase.Repository.EliminarTodo();
+                        MessageBox.Show("Registros eliminados correctamente.", "OK",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Carga cancelada.", "Cancelado",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
+                    }
+                }
+
+                // ===============================
+                // ABRIR ARCHIVO TXT
+                // ===============================
                 OpenFileDialog dialog = new OpenFileDialog();
                 dialog.Filter = "Archivos TXT|*.txt";
-                dialog.Title = "Seleccionar archivo CALENDARIO.txt";
 
                 if (dialog.ShowDialog() != DialogResult.OK)
                     return;
 
-                // Mostrar mensaje de carga
                 Cursor.Current = Cursors.WaitCursor;
                 this.Enabled = false;
 
-                // Mostrar información del archivo
                 MostrarInfoArchivo(dialog.FileName);
 
-                // Procesar archivo
                 var lista = _useCase.Ejecutar(dialog.FileName);
 
-                // Mostrar datos en el DataGridView
                 dataView_Calendario.DataSource = ConvertirListaATabla(lista);
 
-                MessageBox.Show($"Calendario cargado correctamente.\n" +
-                               $"Registros procesados: {lista.Count}\n" +
-                               $"Archivo: {Path.GetFileName(dialog.FileName)}",
+                MessageBox.Show($"Calendario cargado correctamente.\nRegistros: {lista.Count}",
                     "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error al cargar el calendario:\n\n{ex.Message}\n\n" +
-                               $"Tipo de error: {ex.GetType().Name}\n" +
-                               $"¿Es problema de formato? Intente verificar el formato del archivo.",
+                MessageBox.Show($"Error al cargar:\n{ex.Message}",
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
@@ -185,70 +189,49 @@ namespace Prueba1_Login.Views
             try
             {
                 var lineas = File.ReadAllLines(rutaArchivo);
-                Console.WriteLine($"=== INFORMACIÓN DEL ARCHIVO ===");
-                Console.WriteLine($"Ruta: {rutaArchivo}");
-                Console.WriteLine($"Total líneas: {lineas.Length}");
+                Console.WriteLine($"Archivo: {rutaArchivo}");
+                Console.WriteLine($"Líneas: {lineas.Length}");
 
                 if (lineas.Length > 0)
                 {
-                    Console.WriteLine($"Primera línea: {lineas[0]}");
-                    Console.WriteLine($"Longitud primera línea: {lineas[0].Length}");
-
-                    // Mostrar primeros 3 caracteres de cada línea para identificar formato
-                    Console.WriteLine("Primeros caracteres de cada línea:");
-                    for (int i = 0; i < Math.Min(5, lineas.Length); i++)
-                    {
-                        if (!string.IsNullOrEmpty(lineas[i]))
-                        {
-                            string primeros = lineas[i].Length > 20 ? lineas[i].Substring(0, 20) + "..." : lineas[i];
-                            Console.WriteLine($"  Línea {i + 1}: {primeros}");
-                        }
-                    }
+                    Console.WriteLine($"Primera línea ({lineas[0].Length} chars): {lineas[0]}");
                 }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error al leer archivo: {ex.Message}");
-            }
+            catch { }
         }
 
-        // =====================================================
-        // 🔵 Convertir lista a DataTable
-        // =====================================================
         private DataTable ConvertirListaATabla(List<CalendarioSorteos> lista)
         {
             DataTable dt = new DataTable();
 
-            // Definir columnas según la tabla
             dt.Columns.Add("IdTipoSorteo", typeof(int));
             dt.Columns.Add("NumeroSorteo", typeof(int));
             dt.Columns.Add("NumeroInterno", typeof(int));
             dt.Columns.Add("EmisionSerie", typeof(long));
             dt.Columns.Add("NumeroSeries", typeof(int));
             dt.Columns.Add("FechaCelebracion", typeof(DateTime));
-            dt.Columns.Add("ValorEntero", typeof(decimal));
+            dt.Columns.Add("ValorEntero", typeof(int)); // ✔ Ya no decimal
             dt.Columns.Add("Estatus", typeof(string));
             dt.Columns.Add("BilleteInicial", typeof(long));
             dt.Columns.Add("BilleteFinal", typeof(long));
 
-            foreach (var item in lista)
+            foreach (var x in lista)
             {
                 dt.Rows.Add(
-                    item.IdTipoSorteo,
-                    item.NumeroSorteo,
-                    item.NumeroInterno ?? 0,
-                    item.EmisionSerie ?? 0,
-                    item.NumeroSeries ?? 0,
-                    item.FechaCelebracion,
-                    item.ValorEntero ?? 0m,
-                    item.Estatus,
-                    item.BilleteInicial ?? 0,
-                    item.BilleteFinal ?? 0
+                    x.IdTipoSorteo,
+                    x.NumeroSorteo,
+                    x.NumeroInterno ?? 0,
+                    x.EmisionSerie ?? 0,
+                    x.NumeroSeries ?? 0,
+                    x.FechaCelebracion,
+                    x.ValorEntero ?? 0,   // ✔ Se muestra como 800, no 8.00
+                    x.Estatus,
+                    x.BilleteInicial ?? 0,
+                    x.BilleteFinal ?? 0
                 );
             }
 
             return dt;
         }
-
     }
 }

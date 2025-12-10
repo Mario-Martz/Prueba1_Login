@@ -16,5 +16,13 @@
         // ===================================
         public string PasswordHash { get; set; } // Contraseña hasheada
         public string PasswordSalt { get; set; } // Salt para el hash
+
+        //Nuevos campos para los usuarios Auditoria (Creacion, Eliminacion (Activo = 1, Inactivo = 0))
+
+        public bool Activo { get; set; } = true;
+        public DateTime FechaRegistro { get; set; }
+        public string UsuarioRegistro { get; set; }
+        public DateTime? FechaBaja { get; set;}
+        public string UsuarioBaja {  get; set; }
     }
 }

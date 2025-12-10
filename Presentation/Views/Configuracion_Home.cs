@@ -295,7 +295,33 @@ namespace Prueba1_Login.Views
 
         private string GenerarCodigoUsuario()
         {
-            return "USR_" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
+            // 1. Obtener los textos de los inputs, quitar espacios sobrantes y convertir a mayúsculas
+            string nombre = txtCre_Nombre.Text.Trim().ToUpper();
+
+            // Al Paterno le quitamos los espacios intermedios por si es compuesto (ej: "DE LA O" -> "DELAO")
+            // para que el ID no tenga espacios vacíos.
+            string apPaterno = txtCre__Apell_P.Text.Trim().Replace(" ", "").ToUpper();
+
+            string apMaterno = txtCre__Apell_M.Text.Trim().ToUpper();
+
+            // 2. Obtener las iniciales (validamos que no esté vacío para evitar error de índice)
+            string letraNombre = (nombre.Length > 0) ? nombre.Substring(0, 1) : "X";
+            string letraMaterno = (apMaterno.Length > 0) ? apMaterno.Substring(0, 1) : "X";
+
+            // 3. Armar el código: USR + InicialNombre + PaternoCompleto + InicialMaterno
+            // Ejemplo: Juan Perez Lopez -> USRJPEREZL
+            Random rnd = new Random();
+            string aleatorio = rnd.Next(10, 99).ToString(); // Genera número entre 10 y 99
+            string codigoGenerado = $"USR_{letraNombre}{apPaterno}{letraMaterno}{aleatorio}";
+
+            // 4. Validación de seguridad: Tu base de datos es VARCHAR2(20). 
+            // Si el apellido es muy largo, cortamos para que no de error al guardar.
+            if (codigoGenerado.Length > 20)
+            {
+                codigoGenerado = codigoGenerado.Substring(0, 20);
+            }
+
+            return codigoGenerado;
         }
 
         private void LimpiarCamposCrearUsuario()
